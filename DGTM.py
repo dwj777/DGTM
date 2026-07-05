@@ -90,25 +90,25 @@ def model(y, t, params):
 
     basal_P = 0.01; basal_G = 0.01; basal_T = 0.03; basal_M = 0.05
 
-    fG2P = 0.5 * (1 + 1 / (1 + (G / K_GtoP) ** hg2p))
+    fG2P =  (1 + 1 / (1 + (G / K_GtoP) ** hg2p))
     dPdt = (basal_P
             + alpha * (1 / (1 + (M / K_MtoP) ** hm2p)) * fG2P
             + beta_P * (P ** hp2p / (K_Pauto ** hp2p + P ** hp2p))
            ) - gamma * P
 
     dGdt = (basal_G
-            + 0.5*alpha * (P ** hp2g / (K_PtoG ** hp2g + P ** hp2g))
+            + alpha * (P ** hp2g / (K_PtoG ** hp2g + P ** hp2g))
                      * (T ** ht2g / (K_TtoG ** ht2g + T ** ht2g))
                      * (1 / (1 + (M / K_MtoG) ** hm2g))
             - gamma * G)
 
     dTdt = (basal_T
-            + 0.5*alpha * (G ** hg2t / (K_GtoT ** hg2t + G ** hg2t))
+            + alpha * (G ** hg2t / (K_GtoT ** hg2t + G ** hg2t))
                       * (1 / (1 + (T / K_Tauto) ** ht2t))
             - gamma * T)
 
     dMdt = (basal_M
-            + 0.5*alpha * (1 / (1 + w_P * (P / K_PtoM) ** hp2m + w_G * (G / K_GtoM) ** hg2m + w_T * (T / K_TtoM) ** ht2m))
+            + alpha * (1 / (1 + w_P * (P / K_PtoM) ** hp2m + w_G * (G / K_GtoM) ** hg2m + w_T * (T / K_TtoM) ** ht2m))
             - gamma * M)
 
     return np.array([dPdt, dGdt, dTdt, dMdt], dtype=float)
