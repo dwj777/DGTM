@@ -90,7 +90,7 @@ def model(y, t, params):
 
     basal_P = 0.01; basal_G = 0.01; basal_T = 0.03; basal_M = 0.05
 
-    fG2P =  (1 + 1 / (1 + (G / K_GtoP) ** hg2p))
+    fG2P = (1 + 1 / (1 + (G / K_GtoP) ** hg2p))
     dPdt = (basal_P
             + alpha * (1 / (1 + (M / K_MtoP) ** hm2p)) * fG2P
             + beta_P * (P ** hp2p / (K_Pauto ** hp2p + P ** hp2p))
@@ -120,9 +120,9 @@ def sample_parameters_from_u(u):
 
     n_dims = 17
     if len(u) != n_dims:
-        raise ValueError(f"u 长度需为 {n_dims}，收到 {len(u)}")
+        raise ValueError(f"u must have length {n_dims}, got {len(u)}")
 
-    alpha = rnd(map_lin(u[0], 0.1, 5.0))
+    alpha = rnd(map_lin(u[0], 0.1, 3.0))
     beta_P = rnd(map_lin(u[1], 0.1, 3.0))
     gamma = rnd(map_lin(u[2], 0.01, 0.5))
 
@@ -339,28 +339,28 @@ def passes_norm_pattern_row(normalized_matrix, debug=False):
 def save_results_to_word(accepted, out_path):
     try:
         doc = Document()
-        doc.add_heading('DGTM 模型（LHS + fsolve）结果', level=1)
+        doc.add_heading('DGTM Model (LHS + fsolve) Results', level=1)
         for i, item in enumerate(accepted, 1):
             if len(item) == 3:
                 p, reps_with_scores, normalized = item
             else:
                 p, reps_with_scores = item
                 normalized = None
-            doc.add_heading(f'参数组 #{i}', level=2)
+            doc.add_heading(f'Parameter Set #{i}', level=2)
             for f in ['P','G','T','M']:
                 if f in p and isinstance(p[f], dict):
                     items = sorted(p[f].items(), key=lambda x: x[0])
-                    doc.add_paragraph(f"{f} 参数: " + ", ".join(f"{k}={v:.6g}" for k,v in items))
+                    doc.add_paragraph(f"{f} parameters: " + ", ".join(f"{k}={v:.6g}" for k,v in items))
             if 'weights' in p and isinstance(p['weights'], dict):
                 items = sorted(p['weights'].items(), key=lambda x: x[0])
-                doc.add_paragraph("weights 参数: " + ", ".join(f"{k}={v:.6g}" for k,v in items))
+                doc.add_paragraph("weights parameters: " + ", ".join(f"{k}={v:.6g}" for k,v in items))
             excluded = set(['P','G','T','M','weights'])
             top_level_keys = sorted([k for k,v in p.items() if not isinstance(v, dict) and k not in excluded])
             if top_level_keys:
-                doc.add_paragraph("其他顶层参数: " + ", ".join(f"{k}={p[k]:.6g}" for k in top_level_keys))
-            doc.add_paragraph(f"稳态点数: {len(reps_with_scores)}")
+                doc.add_paragraph("Other top-level parameters: " + ", ".join(f"{k}={p[k]:.6g}" for k in top_level_keys))
+            doc.add_paragraph(f"Number of steady states: {len(reps_with_scores)}")
             if normalized is not None and len(normalized) == len(reps_with_scores):
-                doc.add_paragraph("（每行：原始稳态点 P,G,T,M  |  对应按行归一化 P,G,T,M）")
+                doc.add_paragraph("(Each row: original steady state P,G,T,M | corresponding row-normalized P,G,T,M)")
                 for (pt, score), norm_row in zip(reps_with_scores, normalized):
                     orig_str = ", ".join(f"{name}={val:.6f}" for name,val in zip(['P','G','T','M'], pt))
                     norm_str = ", ".join(f"{v:.6f}" for v in norm_row)
@@ -439,7 +439,7 @@ def main(random_state=None,
         normalized_list = normalized_matrix.tolist()
         accepted.append((params, reps_final, normalized_list)); counters['accepted'] += 1
         print(f"=== Found accepted #{counters['accepted']} at candidate #{idx}/{len(U_list)} ===")
-        print("(格式：原始 P,G,T,M  |  按行归一化 P,G,T,M  |  jacobian_score)")
+        print("Format: original P,G,T,M | row-normalized P,G,T,M | jacobian_score")
         for (pt, sc), norm_row in zip(reps_final, normalized_list):
             orig_str = ", ".join(f"{v:.6f}" for v in pt)
             norm_str = ", ".join(f"{v:.6f}" for v in norm_row)
@@ -474,24 +474,3 @@ if __name__ == "__main__":
         )
         print(f"Run {run_idx+1} finished. Accepted count: {0 if out is None else len(out)}")
     print("All runs completed.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
